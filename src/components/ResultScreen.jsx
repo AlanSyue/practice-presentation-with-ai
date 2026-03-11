@@ -10,6 +10,26 @@ export default function ResultScreen({
   const title = presentation?.title || 'Untitled'
   const totalDuration = recordingResult?.totalDuration || 0
 
+  const handleDownloadAudio = () => {
+    const ext = recordingResult.audioBlob.type.includes('mp4') ? 'm4a'
+      : recordingResult.audioBlob.type.includes('ogg') ? 'ogg'
+      : recordingResult.audioBlob.type.includes('wav') ? 'wav'
+      : 'webm'
+    const now = new Date()
+    const ts = now.getFullYear().toString()
+      + (now.getMonth() + 1).toString().padStart(2, '0')
+      + now.getDate().toString().padStart(2, '0')
+      + now.getHours().toString().padStart(2, '0')
+      + now.getMinutes().toString().padStart(2, '0')
+      + now.getSeconds().toString().padStart(2, '0')
+    const url = URL.createObjectURL(recordingResult.audioBlob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${title || 'recording'}_${ts}.${ext}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
@@ -32,6 +52,12 @@ export default function ResultScreen({
               className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors cursor-pointer"
             >
               下載 TXT
+            </button>
+            <button
+              onClick={handleDownloadAudio}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors cursor-pointer"
+            >
+              下載音檔
             </button>
             <button
               onClick={onStartOver}

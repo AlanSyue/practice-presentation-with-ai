@@ -8,7 +8,7 @@ import ResultScreen from './components/ResultScreen'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
-export default function App() {
+function AppContent() {
   const [accessToken, setAccessToken] = useState(
     () => sessionStorage.getItem('google_access_token') || null
   )
@@ -62,39 +62,46 @@ export default function App() {
   }, [])
 
   return (
+    <div className="min-h-screen bg-gray-50">
+      {screen === 'login' && (
+        <LoginScreen onLogin={handleLogin} savedApiKey={openaiApiKey} />
+      )}
+      {screen === 'load' && (
+        <LoadSlides accessToken={accessToken} onLoaded={handleSlidesLoaded} onLogout={handleLogout} />
+      )}
+      {screen === 'record' && (
+        <RecordingScreen
+          presentation={presentation}
+          thumbnails={thumbnails}
+          onDone={handleRecordingDone}
+        />
+      )}
+      {screen === 'processing' && (
+        <ProcessingScreen
+          recordingResult={recordingResult}
+          openaiApiKey={openaiApiKey}
+          presentation={presentation}
+          onDone={handleTranscriptDone}
+          onStartOver={handleStartOver}
+        />
+      )}
+      {screen === 'result' && (
+        <ResultScreen
+          transcriptResult={transcriptResult}
+          recordingResult={recordingResult}
+          presentation={presentation}
+          thumbnails={thumbnails}
+          onStartOver={handleStartOver}
+        />
+      )}
+    </div>
+  )
+}
+
+export default function App() {
+  return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="min-h-screen bg-gray-50">
-        {screen === 'login' && (
-          <LoginScreen onLogin={handleLogin} savedApiKey={openaiApiKey} />
-        )}
-        {screen === 'load' && (
-          <LoadSlides accessToken={accessToken} onLoaded={handleSlidesLoaded} onLogout={handleLogout} />
-        )}
-        {screen === 'record' && (
-          <RecordingScreen
-            presentation={presentation}
-            thumbnails={thumbnails}
-            onDone={handleRecordingDone}
-          />
-        )}
-        {screen === 'processing' && (
-          <ProcessingScreen
-            recordingResult={recordingResult}
-            openaiApiKey={openaiApiKey}
-            presentation={presentation}
-            onDone={handleTranscriptDone}
-          />
-        )}
-        {screen === 'result' && (
-          <ResultScreen
-            transcriptResult={transcriptResult}
-            recordingResult={recordingResult}
-            presentation={presentation}
-            thumbnails={thumbnails}
-            onStartOver={handleStartOver}
-          />
-        )}
-      </div>
+      <AppContent />
     </GoogleOAuthProvider>
   )
 }

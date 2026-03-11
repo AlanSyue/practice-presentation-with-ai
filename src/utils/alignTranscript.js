@@ -68,7 +68,7 @@ export function alignTranscriptToSlides(whisperResult, slideTimestamps, totalDur
     const presSlide = presentationSlides[slide.slideIndex]
 
     return {
-      slideIndex: slide.slideIndex + 1,
+      slideIndex: presSlide?.originalIndex ?? (slide.slideIndex + 1),
       startTime: formatTime(slide.startTime),
       endTime: formatTime(slide.endTime),
       duration: formatTime(slide.duration),

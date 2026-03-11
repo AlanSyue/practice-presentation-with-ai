@@ -41,14 +41,27 @@ export default function LoadSlides({ accessToken, onLoaded, onLogout }) {
     setLoading(true)
     try {
       const pres = await fetchPresentation(presentationId, accessToken)
-      const thumbPromises = pres.slides.map((slide) =>
+      const activeSlides = pres.slides
+        .map((s, i) => ({ ...s, originalIndex: i + 1 }))
+        .filter(s => !s.slideProperties?.isSkipped)
+      const thumbPromises = activeSlides.map((slide) =>
         fetchSlideThumbnail(presentationId, slide.objectId, accessToken)
       )
       const thumbs = await Promise.all(thumbPromises)
-      setPreview({ presentation: pres, thumbnails: thumbs })
+      setPreview({ presentation: { ...pres, slides: activeSlides }, thumbnails: thumbs })
       saveToRecent(url, pres.title)
     } catch (err) {
-      setError(err.response?.data?.error?.message || '載入投影片失敗，請確認 URL 和權限')
+      const status = err.response?.status
+      const message = err.response?.data?.error?.message || err.message || ''
+      const isAuthError = status === 401 || status === 403
+        || message.includes('authentication credentials')
+        || message.includes('invalid_token')
+        || message.includes('Token has been expired')
+      if (isAuthError) {
+        onLogout()
+        return
+      }
+      setError(message || '載入投影片失敗，請確認 URL 和權限')
     } finally {
       setLoading(false)
     }
@@ -83,7 +96,7 @@ export default function LoadSlides({ accessToken, onLoaded, onLogout }) {
             onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
           />
           <button
-            onClick={handleLoad}
+            onClick={() => handleLoad()}
             disabled={loading || !url.trim()}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >

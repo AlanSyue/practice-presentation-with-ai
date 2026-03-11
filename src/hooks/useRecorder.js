@@ -106,6 +106,8 @@ export function useRecorder() {
         setIsPaused(false)
         resolve({
           audioBlob: blob,
+          audioChunks: [...audioChunks.current],
+          mimeType,
           slideTimestamps: slideTimestamps.current,
           totalDuration,
         })
